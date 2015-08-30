@@ -28,6 +28,16 @@ enum TimerPrescalerValue {
 ///   Requested prescaler value
 void setTimer0Prescaler(TimerPrescalerValue value);
 
+/// Sets timer 1 prescaler to requested value.
+///
+/// This function assumes that Clock Select bits have not been touched yet. Note
+/// that timer 1 does not support all Timer0PrescalerValue values. If illegal
+/// value is entered, prescaler is not set to any value.
+///
+/// \param value
+///   Requested prescaler value
+void setTimer1Prescaler(TimerPrescalerValue value);
+
 /// Sets timer 2 prescaler to requested value.
 ///
 /// This function assumes that Clock Select bits have not been touched yet.

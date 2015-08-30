@@ -11,74 +11,12 @@
 #include <avr/io.h>
 #include <util/delay.h>
 
+#include "UnipolarStepperDriver.h"
+
 /// Initializes analog to digital conversion by setting the reference and
 /// prescaler.
-void initializeAdc() {
-  /*
-  Atmega328p::setVoltageReference(Atmega328p::VREF_VCC);
-  Atmega328p::setAdcPrescalerValue(ADC_PRESCALER);
+void initializePwm() {
 
-  // Enable adc
-  ADCSRA |= BV(ADEN);
-
-// Disable digital input from pins that are used for adc.
-  DIDR0 |= BV(ADC0D) | BV(ADC1D) | BV(ADC2D) | BV(ADC3D);
-  */
-}
-
-int16_t readAnalog0() {
-  /*
-  // Select analog input ADC0
-   ADMUX &= ~BV(MUX3) & ~BV(MUX2) & ~BV(MUX1) & ~BV(MUX0);
-
-  // start conversion and wait until value is available
-  ADCSRA |= BV(ADSC);
-  while(ADCSRA & BV(ADSC));
-
-  return ADC;
-  */
-}
-
-int16_t readAnalog1() {
-  /*
-  // Select analog input ADC1
-   ADMUX &= ~BV(MUX3) & ~BV(MUX2) & ~BV(MUX1);
-   ADMUX |= BV(MUX0);
-
-  // start conversion and wait until value is available
-  ADCSRA |= BV(ADSC);
-  while(ADCSRA & BV(ADSC));
-
-  return ADC;
-  */
-}
-
-int16_t readAnalog2() {
-  /*
-  // Select analog input ADC2
-   ADMUX &= ~BV(MUX3) & ~BV(MUX2) & ~BV(MUX0);
-   ADMUX |= BV(MUX1);
-
-  // start conversion and wait until value is available
-  ADCSRA |= BV(ADSC);
-  while(ADCSRA & BV(ADSC));
-
-  return ADC;
-  */
-}
-
-int16_t readAnalog3() {
-  /*
-  // Select analog input ADC3
-   ADMUX &= ~BV(MUX3) & ~BV(MUX2);
-   ADMUX |= BV(MUX1) | BV(MUX0);
-
-  // start conversion and wait until value is available
-  ADCSRA |= BV(ADSC);
-  while(ADCSRA & BV(ADSC));
-
-  return ADC;
-  */
 }
 
 int main() {
@@ -89,12 +27,116 @@ int main() {
 
     //initializeAdc();
 
+    // Set output pins:
+    //    PB1 (indicator)
+    //    PC0..PC3 (left leg stepper)
     DDRB |= BV(DDB1);
+    DDRC |= BV(DDC0) | BV(DDC1) | BV(DDC2) | BV(DDC3);
+    DDRD |= BV(DDD6);
 
+    // Non-inverting fast pwm mode of timer for outputs OC0A, OC0B
+    // (the eyes)
+    TCCR0A |= BV(WGM01) | BV(WGM00);
+    TCCR0A |= BV(COM0A1);
+    TCCR0A |= BV(COM0B1);
+    Atmega168::setTimer0Prescaler(Atmega168::PSV_64);
+
+    // Non-inverting fast pwm mode of timer for outputs OC1A, OC1B
+    // (the leg motors)
+    TCCR1A |= BV(WGM10);
+    TCCR1B |= BV(WGM12);
+    TCCR1A |= BV(COM1A1);
+    TCCR1A |= BV(COM1B1);
+    Atmega168::setTimer1Prescaler(Atmega168::PSV_64);
+
+    // Set leg direction pins as output: PB3 (left), PB4 (right)
+    DDRB |= BV(DDB3) | BV(DDB4);
+
+    // Nose control pin PD 4as output
+    DDRD |= BV(DDD4);
+
+    uint16_t counter = 0;
+    bool legsRunning = false;
+    bool legsForward = false;
+    bool noseActive = false;
+    bool nosePulling = false;
+    UnipolarStepperDriver tailDriver;
+    bool tailClockwise = true;
     while(true) {
-         _delay_ms(500);
+
+        if(counter % NOSE_ACTIVATION_PERIOD == 0) {
+            noseActive = !noseActive;
+        }
+
+        if(noseActive && (counter % NOSE_HALF_PERIOD == 0)) {
+            if (nosePulling) {
+                PORTD &= ~BV(PORTD4);
+            } else {
+                PORTD |= BV(PORTD4);
+            }
+
+            nosePulling = !nosePulling;
+        }
+
+        if(counter % LEG_ACTIVATION_PERIOD == 0) {
+            if(legsRunning) {
+                OCR0A = 0;
+                OCR1A = 0;
+            } else {
+                OCR0A = LEG_MOTOR_DUTY_CYCLE;
+                OCR1A = LEG_MOTOR_DUTY_CYCLE;
+            }
+
+            legsRunning = !legsRunning;
+        }
+
+        if(counter % LEG_DIRECTION_PERIOD == 0) {
+            if(legsForward) {
+                PORTB |= BV(PORTB3) | BV(PORTB4);
+            } else {
+                PORTB &= ~BV(PORTB3) & ~BV(PORTB4);
+            }
+
+            legsForward = !legsForward;
+        }
+
+        counter++;
+        _delay_ms(LOOP_DELAY);
+
+        // Run tail stepper ¼ of time.
+        if(counter % 4 == 0) {
+            tailDriver.run();
+        } else {
+            tailDriver.rest();
+        }
+
+        if(counter % TAIL_STEP_PERIOD == 0) {
+            tailDriver.step(tailClockwise);
+        }
+
+        if(counter % (TAIL_CHANGE_PERIOD*TAIL_STEP_PERIOD) == 0) {
+            tailClockwise = !tailClockwise;
+        }
+        /* Stepper stuff
         PORTB |= BV(PORTB1);
-         _delay_ms(500);
+        _delay_ms(MOTOR_DELAY);
+        stepMotor(true);
+        _delay_ms(MOTOR_DELAY);
+        stepMotor(true);
+        _delay_ms(MOTOR_DELAY);
+        stepMotor(true);
+        _delay_ms(MOTOR_DELAY);
+        stepMotor(true);
+
         PORTB &= ~BV(PORTB1);
+        _delay_ms(MOTOR_DELAY);
+        stepMotor(true);
+        _delay_ms(MOTOR_DELAY);
+        stepMotor(true);
+        _delay_ms(MOTOR_DELAY);
+        stepMotor(true);
+        _delay_ms(MOTOR_DELAY);
+        stepMotor(true);
+        */
     }
 }

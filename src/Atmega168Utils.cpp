@@ -25,6 +25,26 @@ void setTimer0Prescaler(TimerPrescalerValue value) {
   }
 }
 
+void setTimer1Prescaler(TimerPrescalerValue value) {
+  switch (value) {
+  case PSV_1:
+    TCCR1B |= BV(CS10);
+    break;
+  case PSV_8:
+    TCCR1B |= BV(CS11);
+    break;
+  case PSV_64:
+    TCCR1B |= BV(CS11) | BV(CS10);
+    break;
+  case PSV_256:
+    TCCR1B |= BV(CS12);
+    break;
+  case PSV_1024:
+    TCCR1B |= BV(CS12) | BV(CS10);
+    break;
+  }
+}
+
 void setTimer2Prescaler(TimerPrescalerValue value) {
   switch (value) {
   case PSV_1:
