@@ -9,7 +9,7 @@
 // How long legs retain one direction of movement. Given in units of LOOP_DELAY.
 #define LEG_DIRECTION_PERIOD 1000
 // Pwm duty cycle for running leg motors. 0 is 0 %, 255 is 100 %.
-#define LEG_MOTOR_DUTY_CYCLE 250
+#define LEG_MOTOR_DUTY_CYCLE 127
 
 // How long nose stays active until activated
 #define NOSE_ACTIVATION_PERIOD 100

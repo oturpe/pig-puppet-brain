@@ -47,7 +47,7 @@ int main() {
     TCCR1B |= BV(WGM12);
     TCCR1A |= BV(COM1A1);
     TCCR1A |= BV(COM1B1);
-    Atmega168::setTimer1Prescaler(Atmega168::PSV_64);
+    Atmega168::setTimer1Prescaler(Atmega168::PSV_256);
 
     // Set leg direction pins as output: PB3 (left), PB4 (right)
     DDRB |= BV(DDB3) | BV(DDB4);
@@ -80,11 +80,11 @@ int main() {
 
         if(counter % LEG_ACTIVATION_PERIOD == 0) {
             if(legsRunning) {
-                OCR0A = 0;
-                OCR1A = 0;
+                OCR0A = 0xff;
+                OCR1A = 0xff;
             } else {
-                OCR0A = LEG_MOTOR_DUTY_CYCLE;
-                OCR1A = LEG_MOTOR_DUTY_CYCLE;
+                OCR0A = 0xff - LEG_MOTOR_DUTY_CYCLE;
+                OCR1A = 0xff - LEG_MOTOR_DUTY_CYCLE;
             }
 
             legsRunning = !legsRunning;
