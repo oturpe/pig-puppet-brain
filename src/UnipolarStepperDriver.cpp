@@ -32,10 +32,10 @@ void UnipolarStepperDriver::run() {
         PORTC |= BV(PORTC0);
         return;
     case 1:
-        PORTC |= BV(PORTC1);
+        PORTC |= BV(PORTC2);
         return;
     case 2:
-        PORTC |= BV(PORTC2);
+        PORTC |= BV(PORTC1);
         return;
     case 3:
         PORTC |= BV(PORTC3);

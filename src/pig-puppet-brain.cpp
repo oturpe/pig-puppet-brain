@@ -19,6 +19,35 @@ void initializePwm() {
 
 }
 
+/// \brief
+///    Changes the power indicator led state between on and off.
+inline void flipPowerIndicator() {
+    static bool lit;
+
+    if(lit) {
+        PORTB |= BV(PB6);
+    } else {
+        PORTB &= ~BV(PB6);
+    }
+
+    lit = !lit;
+}
+
+/// \brief
+///    Changes the tail movement direction indicator led state between on and
+///    off.
+inline void flipTailIndicator() {
+    static bool lit;
+
+    if(lit) {
+        PORTC |= BV(PC4);
+    } else {
+        PORTC &= ~BV(PC4);
+    }
+
+    lit = !lit;
+}
+
 int main() {
 
     #ifdef DEBUG
@@ -27,12 +56,14 @@ int main() {
 
     //initializeAdc();
 
-    // Set output pins:
-    //    PB1 (indicator)
-    //    PC0..PC3 (left leg stepper)
-    DDRB |= BV(DDB1);
-    DDRC |= BV(DDC0) | BV(DDC1) | BV(DDC2) | BV(DDC3);
-    DDRD |= BV(DDD6);
+    // Set power indicator output pin PB6
+    DDRB |= BV(DDB6);
+
+    // Set tail output pins: motor PC0..PC3 and direction indicator PC4
+    DDRC |= BV(DDC0) | BV(DDC1) | BV(DDC2) | BV(DDC3) | BV(DDC4);
+
+    // Eye output pins PD5 (left) and  PD6 (right)
+    DDRD |= BV(DDD5) | BV(DDD6);
 
     // Non-inverting fast pwm mode of timer for outputs OC0A, OC0B
     // (the eyes)
@@ -41,18 +72,22 @@ int main() {
     TCCR0A |= BV(COM0B1);
     Atmega168::setTimer0Prescaler(Atmega168::PSV_64);
 
+    // Set leg direction pins as output:
+    // PB1, PB2 (left and right leg motors)
+    // PB3, PB4 (left and right leg direction)
+    DDRB |= BV(DDB1) | BV(DDB2) | BV(DDB3) | BV(DDB4);
+
     // Non-inverting fast pwm mode of timer for outputs OC1A, OC1B
-    // (the leg motors)
+    // (the leg motors). Start with no movement.
+    OCR0A = 0xff;
+    OCR1A = 0xff;
     TCCR1A |= BV(WGM10);
     TCCR1B |= BV(WGM12);
     TCCR1A |= BV(COM1A1);
     TCCR1A |= BV(COM1B1);
     Atmega168::setTimer1Prescaler(Atmega168::PSV_256);
 
-    // Set leg direction pins as output: PB3 (left), PB4 (right)
-    DDRB |= BV(DDB3) | BV(DDB4);
-
-    // Nose control pin PD 4as output
+    // Nose control pin PD4 as output
     DDRD |= BV(DDD4);
 
     uint16_t counter = 0;
@@ -63,6 +98,11 @@ int main() {
     UnipolarStepperDriver tailDriver;
     bool tailClockwise = true;
     while(true) {
+
+        if(counter % INDICATOR_HALF_PERIOD == 0) {
+            // Indicator flashes when the power is on
+            flipPowerIndicator();
+        }
 
         if(counter % NOSE_ACTIVATION_PERIOD == 0) {
             noseActive = !noseActive;
@@ -116,27 +156,7 @@ int main() {
 
         if(counter % (TAIL_CHANGE_PERIOD*TAIL_STEP_PERIOD) == 0) {
             tailClockwise = !tailClockwise;
+            flipTailIndicator();
         }
-        /* Stepper stuff
-        PORTB |= BV(PORTB1);
-        _delay_ms(MOTOR_DELAY);
-        stepMotor(true);
-        _delay_ms(MOTOR_DELAY);
-        stepMotor(true);
-        _delay_ms(MOTOR_DELAY);
-        stepMotor(true);
-        _delay_ms(MOTOR_DELAY);
-        stepMotor(true);
-
-        PORTB &= ~BV(PORTB1);
-        _delay_ms(MOTOR_DELAY);
-        stepMotor(true);
-        _delay_ms(MOTOR_DELAY);
-        stepMotor(true);
-        _delay_ms(MOTOR_DELAY);
-        stepMotor(true);
-        _delay_ms(MOTOR_DELAY);
-        stepMotor(true);
-        */
     }
 }
