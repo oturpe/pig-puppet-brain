@@ -85,6 +85,14 @@ void setVoltageReference(VoltageReference reference) {
   }
 }
 
+void leftAdjustAdcResults(bool leftAdjust) {
+  if(leftAdjust) {
+    ADMUX |= BV(ADLAR);
+  } else {
+    ADMUX &= ~BV(ADLAR);
+  }
+}
+
 void setAdcPrescalerValue(AdcPrescalerValue value) {
   switch(value) {
   case ADC_PSV_2:

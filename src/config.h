@@ -13,7 +13,7 @@
 // How long legs retain one direction of movement. Given in units of LOOP_DELAY.
 #define LEG_DIRECTION_PERIOD 1000
 // Pwm duty cycle for running leg motors. 0 is 0 %, 255 is 100 %.
-#define LEG_MOTOR_DUTY_CYCLE 160
+#define LEG_MOTOR_DUTY_CYCLE 100
 
 // How long nose stays active until activated
 #define NOSE_ACTIVATION_PERIOD 100
@@ -26,11 +26,11 @@
 // TAIL_STEP_PERIOD.
 #define TAIL_CHANGE_PERIOD 70
 
-#define ADC_PRESCALER Atmega328p::ADC_PSV_32
+// How often pen perimeter sensors are read. Given in units of LOOP_DELAY.
+#define SENSOR_INTERVAL 10
 
-#define PWM_PRESCALER Atmega328p::PSV_128
-#define PWM_PORT PORTB
-#define PWM_PIN PORTB1
+// Minimum sensor reading to consider as pen limit found
+#define SENSOR_THRESHOLD 200
 
 //Enables debug messaging
 #define DEBUG

@@ -76,6 +76,13 @@ enum AdcPrescalerValue {
   ADC_PSV_128
 };
 
+/// \brief
+///    Sets adjustment of adc results to right (default) or left.
+///
+/// \param leftAdjust
+///    If results are left adjusted.
+void leftAdjustAdcResults(bool leftAdjust);
+
 // Sets analog-to-digital converter prescaler value.
 //
 // This function assumes that ADV Prescaler Selection bits have not been touched

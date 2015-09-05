@@ -7,18 +7,14 @@
 
 #include "config.h"
 
-#include "Atmega168Utils.h"
 #include <avr/io.h>
 #include <util/delay.h>
 
+#include "Atmega168Utils.h"
+
 #include "UnipolarStepperDriver.h"
 #include "WheelController.h"
-
-/// Initializes analog to digital conversion by setting the reference and
-/// prescaler.
-void initializePwm() {
-
-}
+#include "AnalogThresholdComparator.h"
 
 /// \brief
 ///    Changes the power indicator led state between on and off.
@@ -41,9 +37,9 @@ inline void flipTailIndicator() {
     static bool lit;
 
     if(lit) {
-        PORTC |= BV(PC4);
+        PORTD |= BV(PORTD0);
     } else {
-        PORTC &= ~BV(PC4);
+        PORTD &= ~BV(PORTD0);
     }
 
     lit = !lit;
@@ -60,10 +56,11 @@ int main() {
     // Set power indicator output pin PB6
     DDRB |= BV(DDB6);
 
-    // Set tail output pins: motor PC0..PC3 and direction indicator PC4
-    DDRC |= BV(DDC0) | BV(DDC1) | BV(DDC2) | BV(DDC3) | BV(DDC4);
+    // Set tail output pins: motor PC0..PC3 and direction indicator PD0
+    DDRC |= BV(DDC0) | BV(DDC1) | BV(DDC2) | BV(DDC3);
+    DDRD |= BV(DDD0);
 
-    // Eye output pins PD5 (left) and  PD6 (right)
+    // Eye output pins PD5 (left) and PD6 (right)
     DDRD |= BV(DDD5) | BV(DDD6);
 
     // Non-inverting fast pwm mode of timer for outputs OC0A, OC0B
@@ -93,6 +90,22 @@ int main() {
 
     // Nose control pin PD4 as output
     DDRD |= BV(DDD4);
+
+    // Initialize analog-to-digital conversion for pen limit sensor pins
+    // PC4 (left side, ADC4) and PC5 (right side, ADC5)
+    Atmega168::setVoltageReference(Atmega168::VREF_INTERNAL_1_1V);
+    Atmega168::setAdcPrescalerValue(Atmega168::ADC_PSV_32);
+    // Enable adc
+    ADCSRA |= BV(ADEN);
+
+    // Disable digital inout from pins that are used for adc.
+    DIDR0 |= BV(ADC4D) | BV(ADC5D);
+
+    // Set pen limit sensor indicator pins as output:
+    // PD1 (left) and PD2 (right)
+    DDRD |= BV(DDD1) | BV(DDD2);
+
+    AnalogThresholdComparator sensorReader(SENSOR_THRESHOLD);
 
     uint16_t counter = 0;
     bool legsRunning = false;
@@ -148,9 +161,6 @@ int main() {
             legCounter++;
         }
 
-        counter++;
-        _delay_ms(LOOP_DELAY);
-
         // Run tail stepper ¼ of time.
         if(counter % 4 == 0) {
             tailDriver.run();
@@ -166,5 +176,12 @@ int main() {
             tailClockwise = !tailClockwise;
             flipTailIndicator();
         }
+
+        if(counter % SENSOR_INTERVAL == 0) {
+            AnalogThresholdComparator::Reading reading = sensorReader.read();
+        }
+
+        counter++;
+        _delay_ms(LOOP_DELAY);
     }
 }
