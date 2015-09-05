@@ -14,6 +14,7 @@
 
 #include "UnipolarStepperDriver.h"
 #include "WheelController.h"
+#include "PigMover.h"
 #include "AnalogThresholdComparator.h"
 
 /// \brief
@@ -86,7 +87,8 @@ int main() {
     // PB0, PB5 (left and right leg indicators)
     DDRB |= BV(DDB0) | BV(DDB1) | BV(DDB2) | BV(DDB3) | BV(DDB4) | BV(DDB5);
 
-    WheelController legController(LEG_MOTOR_DUTY_CYCLE);
+    WheelController legs(LEG_MOTOR_DUTY_CYCLE);
+    PigMover mover(legs);
 
     // Nose control pin PD4 as output
     DDRD |= BV(DDD4);
@@ -137,28 +139,6 @@ int main() {
         }
 
         if(counter % LEG_ACTIVATION_PERIOD == 0) {
-            // Stop and cool down before changing movement.
-            legController.stop();
-            _delay_ms(LOOP_DELAY*20);
-            switch(legCounter % 5) {
-            case 0:
-                legController.stop();
-                break;
-            case 1:
-                legController.moveForward();
-                break;
-            case 2:
-                legController.moveBackward();
-                break;
-            case 3:
-                legController.rotateClockwise();
-                break;
-            case 4:
-                legController.rotateCounterClockwise();
-                break;
-            }
-
-            legCounter++;
         }
 
         // Run tail stepper ¼ of time.
@@ -179,8 +159,13 @@ int main() {
 
         if(counter % SENSOR_INTERVAL == 0) {
             AnalogThresholdComparator::Reading reading = sensorReader.read();
+            if(reading.leftFound || reading.rightFound) {
+                // TODO: Work through the pig mover
+                legs.moveBackward();
+            }
         }
 
+        mover.run();
         counter++;
         _delay_ms(LOOP_DELAY);
     }
