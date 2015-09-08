@@ -12,6 +12,18 @@
 /// hides this detail.
 class WheelController {
 public:
+    /// \enum Movement
+    ///
+    /// Different wheel movement types
+    enum Movement {
+        FORWARD,
+        BACKWARD,
+        ROTATE_CW,
+        ROTATE_CCW,
+        STOP
+    };
+
+public:
     /// \brief
     ///    Initializes a new wheel controller instance with specfied power to
     ///    feed to motors.
@@ -26,41 +38,33 @@ public:
 
 public:
     /// \brief
-    ///    Terminates current movement and starts forward movement. The movement
+    ///    Terminates current movement and starts given movement. The movement
     ///    continues until another command is given.
-    void moveForward();
-
-    /// \brief
-    ///    Terminates current movement and starts backward movement. The
-    ///    movement continues until another command is given.
-    void moveBackward();
-
-    /// \brief
-    ///    Terminates current movement and starts clockwise rotation. The
-    ///    rotation continues until another command is given.
-    void rotateClockwise();
-
-    /// \brief
-    ///    Terminates current movement and starts counter clockwise rotation.
-    ///    The rotation continues until another command is given.
-    void rotateCounterClockwise();
-
-    /// \brief
-    ///    Terminates current movement. If wheels are not moving when this
-    ///    function is called, does nothing.
-    void stop();
+    void move(Movement movement);
 
 private:
-    /// \brief Moves left leg forward.
+    /// \brief
+    ///    Moves left leg forward.
     void leftWheelForward();
 
-    /// \brief Moves right leg forward.
+    /// \brief
+    ///    Moves right leg forward.
     void rightWheelForward();
 
-    /// \brief Moves left leg backward.
+    /// \brief
+    ///    Stops left leg.
+    void leftWheelStill();
+
+    /// \brief
+    ///    Stops right leg.
+    void rightWheelStill();
+
+    /// \brief
+    ///    Moves left leg backward.
     void leftWheelBackward();
 
-    /// \brief Moves right leg backward.
+    /// \brief
+    ///    Moves right leg backward.
     void rightWheelBackward();
 
 private:

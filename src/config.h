@@ -8,12 +8,19 @@
 // LOOP_DELAY
 #define INDICATOR_HALF_PERIOD 50
 
-// How long legs stay active when activated. Given in units of LOOP_DELAY.
-#define LEG_ACTIVATION_PERIOD 120
+// How long legs stay active when searching. Given in units of LOOP_DELAY.
+#define LEG_SEARCH_PERIOD 100
+// How long legs stay active when finding line. Given in units of LOOP_DELAY.
+#define LEG_FIND_LINE_PERIOD 100
+// How long legs stay active when retreating. Given in units of LOOP_DELAY.
+#define LEG_RETREAT_PERIOD 100
 // How long legs retain one direction of movement. Given in units of LOOP_DELAY.
 #define LEG_DIRECTION_PERIOD 1000
+// How long legs stop between changing movement types. Given in unuits of
+// LOOP_DELAY-
+#define LEG_TRANSITION_PERIOD 80
 // Pwm duty cycle for running leg motors. 0 is 0 %, 255 is 100 %.
-#define LEG_MOTOR_DUTY_CYCLE 70
+#define LEG_MOTOR_DUTY_CYCLE 100
 
 // How long nose stays active until activated
 #define NOSE_ACTIVATION_PERIOD 100
@@ -30,7 +37,12 @@
 #define SENSOR_INTERVAL 10
 
 // Minimum sensor reading to consider as pen limit found
-#define SENSOR_THRESHOLD 600
+#define SENSOR_THRESHOLD 100
+// Maximum sensor reading to consider as found pen limit lost
+#define SENSOR_HYSTERESIS 30
+
+// How many times a reading must be confirmed to make it valid.
+#define READING_VALIDITY_MINIMUM 1
 
 //Enables debug messaging
 #define DEBUG

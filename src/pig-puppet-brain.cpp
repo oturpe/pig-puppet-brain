@@ -12,6 +12,7 @@
 
 #include "Atmega168Utils.h"
 
+#include "Reading.h"
 #include "UnipolarStepperDriver.h"
 #include "WheelController.h"
 #include "PigMover.h"
@@ -88,7 +89,7 @@ int main() {
     DDRB |= BV(DDB0) | BV(DDB1) | BV(DDB2) | BV(DDB3) | BV(DDB4) | BV(DDB5);
 
     WheelController legs(LEG_MOTOR_DUTY_CYCLE);
-    PigMover mover(legs);
+    PigMover mover(legs, LEG_TRANSITION_PERIOD);
 
     // Nose control pin PD4 as output
     DDRD |= BV(DDD4);
@@ -107,7 +108,8 @@ int main() {
     // PD1 (left) and PD2 (right)
     DDRD |= BV(DDD1) | BV(DDD2);
 
-    AnalogThresholdComparator sensorReader(SENSOR_THRESHOLD);
+    AnalogThresholdComparator sensorReader(SENSOR_THRESHOLD, SENSOR_HYSTERESIS);
+    sensorReader.recordAmbientReading();
 
     uint16_t counter = 0;
     bool legsRunning = false;
@@ -138,9 +140,6 @@ int main() {
             nosePulling = !nosePulling;
         }
 
-        if(counter % LEG_ACTIVATION_PERIOD == 0) {
-        }
-
         // Run tail stepper ¼ of time.
         if(counter % 4 == 0) {
             tailDriver.run();
@@ -158,11 +157,8 @@ int main() {
         }
 
         if(counter % SENSOR_INTERVAL == 0) {
-            AnalogThresholdComparator::Reading reading = sensorReader.read();
-            if(reading.leftFound || reading.rightFound) {
-                // TODO: Work through the pig mover
-                legs.moveBackward();
-            }
+            Reading reading = sensorReader.read();
+            mover.notify(reading);
         }
 
         mover.run();
