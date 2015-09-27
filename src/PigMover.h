@@ -21,6 +21,7 @@ public:
         SEARCH,
         FIND_LINE_CW,
         FIND_LINE_CCW,
+        AVOID_LINE,
         RETREAT
     };
 
@@ -64,6 +65,10 @@ private:
     /// \param rotation
     ///    Which way to rotate to find the line
     void runFindLine(WheelController::Movement rotation);
+
+    /// \brief
+    ///    Proceeds one step in the line avoidance routine
+    void runAvoidLine();
 
     /// \brief
     ///    Proceeds one step in the retreat routine

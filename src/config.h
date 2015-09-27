@@ -12,6 +12,8 @@
 #define LEG_SEARCH_PERIOD 100
 // How long legs stay active when finding line. Given in units of LOOP_DELAY.
 #define LEG_FIND_LINE_PERIOD 100
+// How long legs stay active when avoiding line. Given in units of LOOP_DELAY.
+#define LEG_AVOID_PERIOD 85
 // How long legs stay active when retreating. Given in units of LOOP_DELAY.
 #define LEG_RETREAT_PERIOD 85
 // How long legs stop between changing movement types. Given in unuits of

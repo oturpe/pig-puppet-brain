@@ -38,6 +38,9 @@ void PigMover::run() {
     case FIND_LINE_CCW:
         runFindLine(WheelController::ROTATE_CCW);
         break;
+    case AVOID_LINE:
+        runAvoidLine();
+            break;
     case RETREAT:
         runRetreat();
         break;
@@ -57,14 +60,19 @@ void PigMover::notify(Reading reading) {
     if(reading.left && !reading.right) {
         if (currentBehavior == SEARCH) {
             setBehavior(FIND_LINE_CCW);
+        } else if (currentBehavior == RETREAT) {
+            setBehavior(SEARCH);
         }
 
         return;
     }
 
+    // Similar to the previous case
     if(!reading.left && reading.right) {
         if (currentBehavior == SEARCH) {
             setBehavior(FIND_LINE_CW);
+        } else if (currentBehavior == RETREAT) {
+            setBehavior(SEARCH);
         }
 
         return;
@@ -75,18 +83,22 @@ void PigMover::notify(Reading reading) {
         if(currentBehavior == SEARCH ||
            currentBehavior == FIND_LINE_CW ||
            currentBehavior == FIND_LINE_CCW) {
-            setBehavior(RETREAT);
+            setBehavior(AVOID_LINE);
         }
 
         return;
     }
 
-    // Was looking for pen limit, but somehow lost it. Get back to searching
-    // again.
     if(!reading.left && !reading.right) {
         if(currentBehavior == FIND_LINE_CW ||
            currentBehavior == FIND_LINE_CCW) {
+            // Was looking for pen limit, but somehow lost it. Get back to
+            // searching again.
             setBehavior(SEARCH);
+        } else if (currentBehavior == AVOID_LINE) {
+            // Got clear of the line when trying to get out of it. Start
+            // the actual retreat.
+            setBehavior(RETREAT);
         }
 
         return;
@@ -146,6 +158,30 @@ void PigMover::runFindLine(WheelController::Movement rotation) {
     }
 
     findLineCounter++;
+}
+
+void PigMover::runAvoidLine() {
+    // TODO: Is there a better way?
+    static uint8_t avoidCounter = 0;
+
+    // Still running current behavior
+    if(counter % LEG_AVOID_PERIOD)
+        return;
+
+    switch(avoidCounter % 2) {
+    case 0:
+        setMovement(WheelController::STOP);
+        break;
+    case 1:
+        setMovement(WheelController::BACKWARD);
+        break;
+    }
+
+    // Avoidance goes on until the pig does not see the line.
+    // Thus there is no terminating condition here. See notify()
+    // function for this action.
+
+    avoidCounter++;
 }
 
 void PigMover::runRetreat() {
