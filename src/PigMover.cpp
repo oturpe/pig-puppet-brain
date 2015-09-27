@@ -1,5 +1,6 @@
 #include "config.h"
 
+#include <stdlib.h>
 #include <util/delay.h>
 
 #include "PigMover.h"
@@ -100,24 +101,28 @@ void PigMover::runSearch() {
     if(counter % LEG_SEARCH_PERIOD)
         return;
 
-    switch(searchCounter % 5) {
+    switch(searchCounter % 6) {
     case 0:
-        setMovement(WheelController::ROTATE_CCW);
+        if(rand() % 2) {
+            setMovement(WheelController::ROTATE_CW);
+        } else {
+            setMovement(WheelController::ROTATE_CCW);
+        }
         break;
     case 1:
-        setMovement(WheelController::ROTATE_CCW);
+        // Keep rotating to the same direction
         break;
     case 2:
-        setMovement(WheelController::STOP);
+        setMovement(WheelController::FORWARD);
         break;
     case 3:
-        setMovement(WheelController::FORWARD);
-        break;
-    case 4:
         setMovement(WheelController::STOP);
         break;
-    case 5:
+    case 4:
         setMovement(WheelController::FORWARD);
+        break;
+    case 5:
+        setMovement(WheelController::STOP);
         break;
     }
 
