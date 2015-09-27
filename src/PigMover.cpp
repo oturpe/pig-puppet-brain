@@ -100,17 +100,23 @@ void PigMover::runSearch() {
     if(counter % LEG_SEARCH_PERIOD)
         return;
 
-    switch(searchCounter % 4) {
+    switch(searchCounter % 5) {
     case 0:
-        setMovement(WheelController::STOP);
+        setMovement(WheelController::ROTATE_CCW);
         break;
     case 1:
-        setMovement(WheelController::FORWARD);
+        setMovement(WheelController::ROTATE_CCW);
         break;
     case 2:
         setMovement(WheelController::STOP);
         break;
     case 3:
+        setMovement(WheelController::FORWARD);
+        break;
+    case 4:
+        setMovement(WheelController::STOP);
+        break;
+    case 5:
         setMovement(WheelController::FORWARD);
         break;
     }
@@ -155,7 +161,7 @@ void PigMover::runRetreat() {
     }
 
     // Retreat only for a set time
-    if(retreatCounter % 7 == 0) {
+    if(retreatCounter % 6 == 0) {
         setBehavior(SEARCH);
     }
 

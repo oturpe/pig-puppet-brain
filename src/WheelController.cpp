@@ -38,7 +38,7 @@ void WheelController::move(Movement movement) {
 void WheelController::leftWheelForward() {
     // Set direction, run motor, set indicator
     PORTB |= BV(PORTB3);
-    OCR1A = 0xff - power;
+    OCR1A = 0xff - power - 20; // -10 quick fix to get directional movement
     PORTB |= BV(PORTB0);
 }
 
