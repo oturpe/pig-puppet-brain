@@ -156,17 +156,20 @@ void PigMover::runRetreat() {
     if(counter % LEG_RETREAT_PERIOD)
         return;
 
-    switch(retreatCounter % 2) {
+    switch(retreatCounter % 3) {
     case 0:
         setMovement(WheelController::STOP);
         break;
     case 1:
         setMovement(WheelController::BACKWARD);
         break;
+    case 2:
+        setMovement(WheelController::BACKWARD);
+        break;
     }
 
     // Retreat only for a set time
-    if(retreatCounter % 6 == 0) {
+    if(retreatCounter % 9 == 0) {
         setBehavior(SEARCH);
     }
 
