@@ -10,7 +10,7 @@ class UnipolarStepperDriver {
 
 public:
     /// \brief
-    ///    Creates and initialzes a new unipolar stepper driver instance.
+    ///    Creates and initializes a new unipolar stepper driver instance.
     ///
     /// The motor is initialized not running. Pins used are PC0 ... PC3.
     UnipolarStepperDriver();

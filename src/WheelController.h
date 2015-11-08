@@ -20,8 +20,6 @@ public:
         BACKWARD,
         ROTATE_CW,
         ROTATE_CCW,
-        ROTATE_BACKWARDS_CW,
-        ROTATE_BACKWARDS_CCW,
         STOP
     };
 

@@ -28,14 +28,6 @@ void WheelController::move(Movement movement) {
         //leftWheelBackward();
         rightWheelForward();
         return;
-    case ROTATE_BACKWARDS_CW:
-        //leftWheelForward();
-        rightWheelBackward();
-        return;
-    case ROTATE_BACKWARDS_CCW:
-        leftWheelBackward();
-        //rightWheelForward();
-        return;
     case STOP:
         leftWheelStill();
         rightWheelStill();
