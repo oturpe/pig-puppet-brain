@@ -122,7 +122,10 @@ void PigMover::runSearch() {
         }
         break;
     case 1:
-        // Keep rotating to the same direction
+        // Sometimes stop. Otherwise, keep rotating to the same direction
+        if(rand() % 2) {
+            setMovement(WheelController::STOP);
+        }
         break;
     case 2:
         setMovement(WheelController::FORWARD);
