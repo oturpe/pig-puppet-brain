@@ -15,17 +15,18 @@
 // How long legs stay active when avoiding line. Given in units of LOOP_DELAY.
 #define LEG_AVOID_PERIOD 85
 // How long legs stay active when retreating. Given in units of LOOP_DELAY.
-#define LEG_RETREAT_PERIOD 85
+#define LEG_RETREAT_PERIOD 70
 // How long legs stop between changing movement types. Given in unuits of
 // LOOP_DELAY-
 #define LEG_TRANSITION_PERIOD 80
 // Pwm duty cycle for running leg motors. 0 is 0 %, 255 is 100 %.
-#define LEG_MOTOR_DUTY_CYCLE 90
+#define LEG_MOTOR_DUTY_CYCLE 105
 
-// How long nose stays active until activated
-#define NOSE_ACTIVATION_PERIOD 100
 // Half duration of one nose pull. Given in units of LOOP_DELAY.
-#define NOSE_HALF_PERIOD 5
+#define NOSE_HALF_PERIOD 25
+// Half duration of one sequence of nose pulls. Given in units of nose half
+// period.
+#define NOSE_HALF_UPPER_PERIOD 8
 
 // Duration of one step of tail movement. Given in units of LOOP_DELAY.
 #define TAIL_STEP_PERIOD 4

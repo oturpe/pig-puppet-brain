@@ -5,19 +5,24 @@
 
 #include "PigMover.h"
 
-PigMover::PigMover(WheelController & legs, uint16_t transitionPeriod)
-  : currentBehavior(SEARCH),
-    currentMovement(WheelController::STOP),
-    transitionPeriod(transitionPeriod),
-    transitionCounter(0),
-    counter(0),
-    legs(legs) {
+PigMover::PigMover(WheelController & legs,
+                   NoseController & nose,
+                    uint16_t transitionPeriod)
+      : currentMovement(WheelController::STOP),
+        transitionPeriod(transitionPeriod),
+        transitionCounter(0),
+        counter(0),
+        legs(legs),
+        nose(nose) {
+    setBehavior(SEARCH);
 }
 
 PigMover::~PigMover() {
 }
 
 void PigMover::run() {
+    nose.run();
+
     // Stop if still waiting in transition
     if(transitionCounter > 0) {
         legs.move(WheelController::STOP);
@@ -230,4 +235,10 @@ void PigMover::setBehavior(Behavior behavior) {
     counter = 0;
     transitionCounter = transitionPeriod;
     currentBehavior = behavior;
+
+    if(behavior == SEARCH) {
+        nose.start();
+    } else {
+        nose.stop();
+    }
 }

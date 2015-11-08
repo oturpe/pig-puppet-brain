@@ -3,15 +3,18 @@
 
 #include "Reading.h"
 #include "WheelController.h"
+#include "NoseController.h"
 
 /// \class PigMover
 ///
-/// Controls the movement of the pig by issuing commands to leg controller.
-/// While the leg controller takes care of controlling actuatorsa and setting
-/// indicators, this class contains the behavior of the pig.
+/// Controls the movement of the pig by issuing commands to leg and nose
+/// controllers. While the leg controller takes care of controlling actuators
+/// and setting indicators, this class contains the behavior of the pig.
 ///
 /// This class expects to have the run() method called on regular intervals.
-/// These calls provide the clock for the movements.
+/// These calls provide the clock for the movements. These clock events are
+/// passed on to nose mover (and possible other subordinate modules) as they
+/// are.
 class PigMover {
 public:
     /// \enum MovementType
@@ -31,7 +34,12 @@ public:
     ///
     /// \param legs
     ///    Leg controller to call
-    PigMover(WheelController & legs, uint16_t transitionPeriod);
+    ///
+    /// \param nose
+    ///    Nose controller to call
+    PigMover(WheelController & legs,
+             NoseController & nose,
+             uint16_t transitionPeriod);
 
     /// \brief
     ///    Destoys this pig mover instance.
@@ -40,6 +48,7 @@ public:
 public:
     /// \brief
     ///    Runs the pig using current movement type and increments the counter.
+    ///    Also passes the clock event to subordinate modules.
     ///
     /// Exact behavior of this call depends on current movement type as set by
     /// calling setMovementType(MovementType.
@@ -85,6 +94,8 @@ private:
     ///    Sets a new behavior and resets behavior and transition counters. The
     /// new behavior starts when run() is next called, the first action being
     /// waiting for transition.
+    ///
+    /// Nose movements are determined by this function.
     void setBehavior(Behavior behavior);
 
 private:
@@ -93,6 +104,9 @@ private:
 
     /// Leg controller to delegate the actual movements
     WheelController & legs;
+
+    /// Nose controller to notify about state
+    NoseController & nose;
 
     /// Current behavior
     Behavior currentBehavior;
